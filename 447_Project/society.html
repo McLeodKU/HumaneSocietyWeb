@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas County Humane</title>
+    <link rel="icon" type="image/png" href="small.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="navbar">
+    <img src="logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
+    <div>
+        <a href="#about">About Us</a>
+        <a href="#pets">Available Pets</a>
+        <a href="#help">How to Help</a>
+        <a href="#contact">Contact</a>
+    </div>
+</div>
+
+<header>
+    <h1>Welcome to Our Humane Society Adoption Center</h1>
+    <p>Helping Pets Find Forever Homes</p>
+</header>
+
+<div class="container">
+    <section id="about">
+        <h2>About Us</h2>
+        <p>We are a non-profit organization dedicated to the welfare of animals. We provide shelter, care, and love to homeless pets until they find their forever homes.</p>
+    </section>
+    
+    <section id="pets">
+        <h2>Animal Details</h2>
+        <div class="query-box">
+            <form action="#" method="GET">
+                <label for="query">Search for an animal:</label>
+                <input type="text" id="query" name="query">
+                <select name="column">
+                    <option value="NAME">Name</option>
+                    <option value="VACCINATIONS">Vaccinations</option>
+                    <option value="DOB">Date of Birth</option>
+                    <option value="WEIGHT">Weight</option>
+                    <option value="ORIGIN">Origin</option>
+                    <option value="GENDER">Gender</option>
+                </select>
+                <label for="sort">Sort by:</label>
+                <button type="submit" name="sort_by" value="weight_asc">Weight ASC</button>
+                <button type="submit" name="sort_by" value="dob_asc">DOB ASC</button>
+                <button type="submit" name="sort_by" value="dob_desc">DOB DESC</button>
+            </form>
+        </div>
+        <div class="row">
+            <?php
+                error_reporting(E_ALL);
+                ini_set('display_errors', 1);
+    
+                include 'db_connection.php'; // Include the database connection file
+
+                // Check if a query has been submitted
+                if(isset($_GET['query']) && isset($_GET['column'])) {
+                    $query = $_GET['query'];
+                    $column = $_GET['column'];
+                    
+                    // Construct the SQL query based on the selected column
+                    $sql = "SELECT * FROM ANIMAL WHERE $column LIKE '%$query%'";
+                    
+                    // Check if sorting is requested
+                    if(isset($_GET['sort_by'])) {
+                        $sort_by = $_GET['sort_by'];
+                        switch ($sort_by) {
+                            case 'weight_asc':
+                                $sql .= " ORDER BY WEIGHT ASC";
+                                break;
+                            case 'dob_asc':
+                                $sql .= " ORDER BY DOB ASC";
+                                break;
+                            case 'dob_desc':
+                                $sql .= " ORDER BY DOB DESC";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                } else {
+                    // Default SQL query to retrieve all animals
+                    $sql = "SELECT * FROM ANIMAL";
+                }
+
+                $result = $conn->query($sql);
+
+                if ($result->num_rows > 0) {
+                    // Output data of each animal
+                    while($row = $result->fetch_assoc()) {
+                        echo "<div class='animal-square'>";
+                        echo "<h3>" . $row["NAME"] . "</h3>";
+                        echo "<p>Vaccinations: " . $row["VACCINATIONS"] . "</p>";
+                        echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
+                        echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
+                        echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
+                        echo "<p>Gender: " . $row["GENDER"] . "</p>";
+                        echo "</div>";
+                    }
+                } else {
+                    echo "No animals found.";
+                }
+                $conn->close(); // Close the database connection
+            ?>
+        </div>
+    </section>
+    
+    <section id="help">
+        <h2>How You Can Help</h2>
+        <p>You can help by adopting a pet, volunteering your time, or making a donation. Every little bit helps us continue our mission.</p>
+    </section>
+    
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <p>If you're interested in adopting a pet or have any questions, please contact us at info@humane-society.com or (555) 123-4567.</p>
+    </section>
+</div>
+
+<footer>
+    <div class="footer">
+        <a href="#about">About Us</a>
+        <a href="https://www.example.com/donate" target="_blank">Donate</a>
+        <a href="https://www.example.com/volunteer" target="_blank">Volunteer</a>
+    </div>
+    <p>&copy; 2024 Humane Society Adoption Center. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
