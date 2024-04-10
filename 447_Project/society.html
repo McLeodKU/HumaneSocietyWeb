@@ -39,73 +39,122 @@
                 <input type="text" id="query" name="query">
                 <select name="column">
                     <option value="NAME">Name</option>
-                    <option value="VACCINATIONS">Vaccinations</option>
                     <option value="DOB">Date of Birth</option>
                     <option value="WEIGHT">Weight</option>
                     <option value="ORIGIN">Origin</option>
                     <option value="GENDER">Gender</option>
                 </select>
-                <label for="sort">Sort by:</label>
-                <button type="submit" name="sort_by" value="weight_asc">Weight ASC</button>
-                <button type="submit" name="sort_by" value="dob_asc">DOB ASC</button>
-                <button type="submit" name="sort_by" value="dob_desc">DOB DESC</button>
+                <div class="checkbox-group">
+                    <fieldset>
+                        <legend>Select animal type:</legend>
+                        <input type="checkbox" id="cat" name="animal_type[]" value="cat">
+                        <label for="cat">Cat</label>
+                        <input type="checkbox" id="dog" name="animal_type[]" value="dog">
+                        <label for="dog">Dog</label>
+                    </fieldset>
+                </div>
+                <div class="checkbox-group">
+                    <fieldset>
+                        <legend>Sort by:</legend>
+                        <input type="checkbox" id="age_desc" name="sort_by[]" value="age_desc">
+                        <label for="age_desc">Age Descending</label>
+                        <input type="checkbox" id="age_asc" name="sort_by[]" value="age_asc">
+                        <label for="age_asc">Age Ascending</label>
+                        <input type="checkbox" id="name_asc" name="sort_by[]" value="name_asc">
+                        <label for="name_asc">Name Ascending</label>
+                        <input type="checkbox" id="name_desc" name="sort_by[]" value="name_desc">
+                        <label for="name_desc">Name Descending</label>
+                    </fieldset>
+                </div>
+                <button type="submit">Search</button>
             </form>
         </div>
         <div class="row">
             <?php
-                error_reporting(E_ALL);
-                ini_set('display_errors', 1);
-    
-                include 'db_connection.php'; // Include the database connection file
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
 
-                // Check if a query has been submitted
-                if(isset($_GET['query']) && isset($_GET['column'])) {
-                    $query = $_GET['query'];
-                    $column = $_GET['column'];
-                    
-                    // Construct the SQL query based on the selected column
-                    $sql = "SELECT * FROM ANIMAL WHERE $column LIKE '%$query%'";
-                    
-                    // Check if sorting is requested
-                    if(isset($_GET['sort_by'])) {
-                        $sort_by = $_GET['sort_by'];
-                        switch ($sort_by) {
-                            case 'weight_asc':
-                                $sql .= " ORDER BY WEIGHT ASC";
+            include 'db_connection.php'; // Include the database connection file
+
+            // Check if a query has been submitted
+            if (isset($_GET['query']) && isset($_GET['column']) && isset($_GET['animal_type'])) {
+                $query = $_GET['query'];
+                $column = $_GET['column'];
+                $animal_types = $_GET['animal_type'];
+                $animal_type_sql = "";
+
+                // Construct the animal type filter for the SQL query
+                foreach ($animal_types as $type) {
+                    if ($type == 'cat') {
+                        $animal_type_sql .= " OR CAT.MICROCHIPNUM IS NOT NULL";
+                    } elseif ($type == 'dog') {
+                        $animal_type_sql .= " OR DOG.MICROCHIPNUM IS NOT NULL";
+                    }
+                }
+
+                // Remove leading " OR " from the constructed string
+                $animal_type_sql = ltrim($animal_type_sql, " OR ");
+
+                // Construct the sort order for the SQL query
+                $sort_order = "";
+                if (isset($_GET['sort_by'])) {
+                    $sort_by = $_GET['sort_by'];
+                    foreach ($sort_by as $sort_option) {
+                        switch ($sort_option) {
+                            case 'age_desc':
+                                $sort_order .= "AGE DESC, ";
                                 break;
-                            case 'dob_asc':
-                                $sql .= " ORDER BY DOB ASC";
+                            case 'age_asc':
+                                $sort_order .= "AGE ASC, ";
                                 break;
-                            case 'dob_desc':
-                                $sql .= " ORDER BY DOB DESC";
+                            case 'name_asc':
+                                $sort_order .= "NAME ASC, ";
+                                break;
+                            case 'name_desc':
+                                $sort_order .= "NAME DESC, ";
                                 break;
                             default:
                                 break;
                         }
                     }
-                } else {
-                    // Default SQL query to retrieve all animals
-                    $sql = "SELECT * FROM ANIMAL";
+                    // Remove trailing ", " from the constructed string
+                    $sort_order = rtrim($sort_order, ", ");
                 }
 
-                $result = $conn->query($sql);
+                // Construct the SQL query based on the selected column, animal types, and sort order
+                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM WHERE ($animal_type_sql) AND $column LIKE '%$query%'";
+                if ($sort_order != "") {
+                    $sql .= " ORDER BY $sort_order";
+                }
+            } else {
+                // Default SQL query to retrieve all animals
+                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM";
+            }
 
-                if ($result->num_rows > 0) {
-                    // Output data of each animal
-                    while($row = $result->fetch_assoc()) {
-                        echo "<div class='animal-square'>";
-                        echo "<h3>" . $row["NAME"] . "</h3>";
-                        echo "<p>Vaccinations: " . $row["VACCINATIONS"] . "</p>";
-                        echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
-                        echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
-                        echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
-                        echo "<p>Gender: " . $row["GENDER"] . "</p>";
-                        echo "</div>";
+            $result = $conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Output data of each animal
+                while ($row = $result->fetch_assoc()) {
+                    echo "<div class='animal-square'>";
+                    echo "<h3>" . $row["NAME"] . "</h3>";
+                    if ($row["DOG_BREED"]) {
+                        echo "<p>Dog Breed: " . $row["DOG_BREED"] . "</p>";
                     }
-                } else {
-                    echo "No animals found.";
+                    if ($row["CAT_BREED"]) {
+                        echo "<p>Cat Breed: " . $row["CAT_BREED"] . "</p>";
+                    }
+                    echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
+                    echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
+                    echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
+                    echo "<p>Gender: " . $row["GENDER"] . "</p>";
+                    echo "<p>Vaccinations: " . $row["VACCINATIONS"] . "</p>";
+                    echo "</div>";
                 }
-                $conn->close(); // Close the database connection
+            } else {
+                echo "No animals found.";
+            }
+            $conn->close(); // Close the database connection
             ?>
         </div>
     </section>

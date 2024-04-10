@@ -83,3 +83,25 @@ h2 {
     border-radius: 5px;
     box-sizing: border-box;
 }
+.query-box {
+    background-image: linear-gradient(to right, #007BFF, #654ea3);
+    padding: 10px; /* Padding around the box */
+    margin-bottom: 20px; /* Space between the box and other elements */
+}
+
+/* Style for checkbox labels */
+.query-box label {
+    display: block; /* Display labels as block elements */
+    margin-bottom: 5px; /* Space between labels */
+}
+
+/* Style for checkboxes */
+.query-box input[type="checkbox"] {
+    margin-right: 5px; /* Space between checkbox and label */
+}
+
+.checkbox-group {
+    background-image: linear-gradient(to right, #505050, #3c3c3c);
+    color: #ffffff;
+    
+}
