@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #f4f4f4;
+}
+.navbar {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar a, .footer a {
+    color: white;
+    text-decoration: none;
+    padding: 0 15px;
+}
+.navbar a:hover, .footer a:hover {
+    text-decoration: underline;
+}
+header, footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px 10px;
+}
+.container {
+    padding: 20px;
+}
+.pet {
+    background-color: white;
+    border: 1px solid #dddddd;
+    margin: 10px 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+}
+.pet-img {
+    width: 200px;
+    height: auto;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+h2 {
+    color: #007BFF;
+}
+.footer {
+    display: flex;
+    justify-content: center;
+    background-color: #007BFF;
+    padding: 10px 20px;
+}
+.footer a {
+    margin: 0 10px;
+}
+
+/* New styles for the navigation bar title */
+.navbar > div:first-child {
+    font-size: 24px; /* Increase the font size */
+    font-weight: 700; /* Make it bold */
+    color: #FFD700; /* Change the color */
+    text-shadow: 1px 1px 8px rgba(0,0,0,0.5); /* Add a subtle shadow for depth */
+}
+
+/* You can also add a gradient background to the navbar for a more vibrant look */
+.navbar {
+    background-image: linear-gradient(to right, #007BFF, #654ea3);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px; /* Negative margin to counteract padding on squares */
+}
+
+.info-square {
+    flex: 0 0 calc(33.33% - 20px); /* Each square takes up 1/3 of the row width with some spacing */
+    margin: 10px; /* Spacing between squares */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.query-box {
+    background-image: linear-gradient(to right, #007BFF, #654ea3);
+    padding: 10px; /* Padding around the box */
+    margin-bottom: 20px; /* Space between the box and other elements */
+}
+
+/* Style for checkbox labels */
+.query-box label {
+    display: block; /* Display labels as block elements */
+    margin-bottom: 5px; /* Space between labels */
+}
+
+/* Style for checkboxes */
+.query-box input[type="checkbox"] {
+    margin-right: 5px; /* Space between checkbox and label */
+}
+
+.checkbox-group {
+    background-image: linear-gradient(to right, #505050, #3c3c3c);
+    color: #ffffff;
+    
+}
+
+.animal-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Distribute items evenly */
+    margin-top: 20px; /* Add space between sections */
+}
+
+.animal-square {
+    flex: 0 0 calc(33.33% - 20px); /* Each square takes up 1/3 of the row width with some spacing */
+    margin-bottom: 20px; /* Add space between squares */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    text-align: center; /* Center the content horizontally */
+}
+
+.animal-square img {
+    max-width: 100%; /* Ensure the image does not exceed the width of its container */
+    max-height: 100%; /* Ensure the image does not exceed the height of its container */
+    border-radius: 5px; /* Optional: Add border-radius to match the square's border radius */
+}
