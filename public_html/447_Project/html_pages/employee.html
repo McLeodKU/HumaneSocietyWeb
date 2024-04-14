@@ -45,6 +45,15 @@
             <div>
                 <button type="submit">Login</button>
             </div>
+            <script>
+                window.onload = function() {
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('error') === 'invalidID') {
+                        alert('Invalid ID');
+                    }
+                }
+                </script>
+                
         </form>
         <?php if (!empty($error)): ?>
             <p style="color: red;"><?php echo $error; ?></p>
