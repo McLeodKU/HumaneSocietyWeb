@@ -1,11 +1,20 @@
 <?php
-session_start(); // Start the session at the very top of the file
+session_start();  // Start the session at the very top of the file
 
-// Check if the user is logged in
-if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
-    header('Location: login.php');
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();  // Destroy the session
+    header("Location: society.php");  // Redirect to the society page after logout
     exit();
+}
+
+// Initialize a session variable if it isn't set
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = generateSessionID();  // Assign a new session ID
+}
+
+function generateSessionID() {
+    return rand(1000, 9999);  // Simple function to generate a random session ID
 }
 ?>
 <!DOCTYPE html>
@@ -24,7 +33,7 @@ if (!isset($_SESSION['user_id'])) {
     <div>
         <a href="society.php">Home</a> 
         <a href="society.php#about">About Us</a>
-        <a href="animals.php">Available Pets</a>
+        <a href="animals.html">Available Pets</a>
         <a href="society.php#contact">Contact</a>
     </div>
 </div>
@@ -48,6 +57,7 @@ if (!isset($_SESSION['user_id'])) {
         <a href="#about">About Us</a>
         <a href="https://www.example.com/donate" target="_blank">Donate</a>
         <a href="https://www.example.com/volunteer" target="_blank">Volunteer</a>
+        <a href="?logout=true">Logout</a> <!-- Logout link added here -->
     </div>
     <p>&copy; 2024 Humane Society Adoption Center. All rights reserved.</p>
 </footer>
