@@ -1,14 +1,22 @@
 <?php
-session_start(); // Start the session at the top of the file
+session_start();  // Start the session at the very top of the file
 
-// Here you can add checks, such as verifying if a user is logged in
-if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
-    header('Location: login.php');
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();  // Destroy the session
+    header("Location: society.php");  // Redirect to the animals page after logout
     exit();
 }
-?>
 
+// Initialize a session variable if it isn't set
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = generateSessionID();  // Assign a new session ID
+}
+
+function generateSessionID() {
+    return rand(1000, 9999);  // Simple function to generate a random session ID
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +34,7 @@ if (!isset($_SESSION['user_id'])) {
     <div>
         <a href="society.php">Home</a> 
         <a href="society.php#about">About Us</a>
-        <a href="animals.php">Available Pets</a>
+        <a href="animals.html">Available Pets</a>
         <a href="society.php#contact">Contact</a>
     </div>
 </div>
@@ -77,48 +85,48 @@ if (!isset($_SESSION['user_id'])) {
         </div>
         <div class="row">
             <?php
-            include 'db_connection.php'; // Include the database connection file
-            // Assuming the database connection $conn is established in db_connection.php
+                include 'db_connection.php'; // Include the database connection file
+                // Assuming the database connection $conn is established in db_connection.php
 
-            // Handle the form submission
-            if ($_SERVER['REQUEST_METHOD'] == 'GET' && !empty($_GET['query'])) {
-                $query = $_GET['query'];
-                $column = $_GET['column'];
-                $animal_types = $_GET['animal_type'] ?? [];
+                // Handle the form submission
+                if ($_SERVER['REQUEST_METHOD'] == 'GET' && !empty($_GET['query'])) {
+                    $query = $_GET['query'];
+                    $column = $_GET['column'];
+                    $animal_types = $_GET['animal_type'] ?? [];
 
-                // Construct the animal type filter for the SQL query
-                $animal_type_sql = array_map(function($type) {
-                    return $type . ".MICROCHIPNUM IS NOT NULL";
-                }, $animal_types);
-                $animal_type_sql = implode(' OR ', $animal_type_sql);
+                    // Construct the animal type filter for the SQL query
+                    $animal_type_sql = array_map(function($type) {
+                        return $type . ".MICROCHIPNUM IS NOT NULL";
+                    }, $animal_types);
+                    $animal_type_sql = implode(' OR ', $animal_type_sql);
 
-                // Construct the sort order for the SQL query
-                $sort_order = "";
-                if (!empty($_GET['sort_by'])) {
-                    $sort_order = implode(', ', array_map(function($sort) {
-                        return $sort;
-                    }, $_GET['sort_by']));
-                }
-
-                // Construct and execute the query
-                $sql = "SELECT * FROM ANIMAL WHERE $column LIKE '%$query%' " .
-                       ($animal_type_sql ? " AND ($animal_type_sql)" : "") .
-                       ($sort_order ? " ORDER BY $sort_order" : "");
-                $result = $conn->query($sql);
-
-                if ($result && $result->num_rows > 0) {
-                    // Output data of each row
-                    while($row = $result->fetch_assoc()) {
-                        echo "<div class='animal-square'>";
-                        echo "<h3>" . htmlspecialchars($row["NAME"]) . "</h3>";
-                        echo "<p>Date of Birth: " . htmlspecialchars($row["DOB"]) . "</p>";
-                        echo "<p>Weight: " . htmlspecialchars($row["WEIGHT"]) . "</p>";
-                        echo "</div>";
+                    // Construct the sort order for the SQL query
+                    $sort_order = "";
+                    if (!empty($_GET['sort_by'])) {
+                        $sort_order = implode(', ', array_map(function($sort) {
+                            return $sort;
+                        }, $_GET['sort_by']));
                     }
-                } else {
-                    echo "No animals found.";
+
+                    // Construct and execute the query
+                    $sql = "SELECT * FROM ANIMAL WHERE $column LIKE '%$query%' " .
+                        ($animal_type_sql ? " AND ($animal_type_sql)" : "") .
+                        ($sort_order ? " ORDER BY $sort_order" : "");
+                    $result = $conn->query($sql);
+
+                    if ($result && $result->num_rows > 0) {
+                        // Output data of each row
+                        while($row = $result->fetch_assoc()) {
+                            echo "<div class='animal-square'>";
+                            echo "<h3>" . htmlspecialchars($row["NAME"]) . "</h3>";
+                            echo "<p>Date of Birth: " . htmlspecialchars($row["DOB"]) . "</p>";
+                            echo "<p>Weight: " . htmlspecialchars($row["WEIGHT"]) . "</p>";
+                            echo "</div>";
+                        }
+                    } else {
+                        echo "No animals found.";
+                    }
                 }
-            }
             ?>
         </div>
     </section>
@@ -139,6 +147,7 @@ if (!isset($_SESSION['user_id'])) {
         <a href="#about">About Us</a>
         <a href="https://www.example.com/donate" target="_blank">Donate</a>
         <a href="https://www.example.com/volunteer" target="_blank">Volunteer</a>
+        <a href="?logout=true">Logout</a> <!-- Logout link added here -->
     </div>
     <p>&copy; 2024 Humane Society Adoption Center. All rights reserved.</p>
 </footer>
