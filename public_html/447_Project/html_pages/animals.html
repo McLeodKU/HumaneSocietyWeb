@@ -1,0 +1,192 @@
+DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas County Humane</title>
+    <link rel="icon" type="image/png" href="small.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<div class="navbar">
+    <img src="../images/logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
+    <div>
+        <a href="../society.html">Home</a> 
+        <a href="../society.html#about">About Us</a>
+        <a href="animals.html">Available Pets</a>
+        <a href="../society.html#contact">Contact</a>
+        <a href="employee.html">Employees</a>
+        <?php
+            session_start();
+            // Check if user is logged in
+            if (isset($_SESSION['number'])) {
+                echo '<a href="../php_code/logout.php">Logout</a>'; // Link to logout script
+            }
+        ?>
+    </div>
+</div>
+
+<header>
+    <h1>Welcome to Our Humane Society Adoption Center</h1>
+    <p>Helping Pets Find Forever Homes</p>
+</header>
+
+<div class="container">
+    
+    <section id="pets">
+        <h2>Animal Details</h2>
+        <div class="query-box">
+            <form action="#" method="GET">
+                <label for="query">Search for an animal:</label>
+                <input type="text" id="query" name="query">
+                <select name="column">
+                    <option value="NAME">Name</option>
+                    <option value="DOB">Date of Birth</option>
+                    <option value="WEIGHT">Weight</option>
+                    <option value="ORIGIN">Origin</option>
+                    <option value="GENDER">Gender</option>
+                </select>
+                <div class="checkbox-group">
+                    <fieldset>
+                        <legend>Select animal type:</legend>
+                        <input type="checkbox" id="cat" name="animal_type[]" value="cat">
+                        <label for="cat">Cat</label>
+                        <input type="checkbox" id="dog" name="animal_type[]" value="dog">
+                        <label for="dog">Dog</label>
+                    </fieldset>
+                </div>
+                <div class="checkbox-group">
+                    <fieldset>
+                        <legend>Sort by:</legend>
+                        <input type="checkbox" id="age_desc" name="sort_by[]" value="age_desc">
+                        <label for="age_desc">Age Descending</label>
+                        <input type="checkbox" id="age_asc" name="sort_by[]" value="age_asc">
+                        <label for="age_asc">Age Ascending</label>
+                        <input type="checkbox" id="name_asc" name="sort_by[]" value="name_asc">
+                        <label for="name_asc">Name Ascending</label>
+                        <input type="checkbox" id="name_desc" name="sort_by[]" value="name_desc">
+                        <label for="name_desc">Name Descending</label>
+                    </fieldset>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="row">
+            <?php
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
+
+            include '../php_code/db_connection.php'; // Include the database connection file
+
+            // Check if a query has been submitted
+            if (isset($_GET['query']) && isset($_GET['column']) && isset($_GET['animal_type'])) {
+                $query = $_GET['query'];
+                $column = $_GET['column'];
+                $animal_types = $_GET['animal_type'];
+                $animal_type_sql = "";
+
+                // Construct the animal type filter for the SQL query
+                foreach ($animal_types as $type) {
+                    if ($type == 'cat') {
+                        $animal_type_sql .= " OR CAT.MICROCHIPNUM IS NOT NULL";
+                    } elseif ($type == 'dog') {
+                        $animal_type_sql .= " OR DOG.MICROCHIPNUM IS NOT NULL";
+                    }
+                }
+
+                // Remove leading " OR " from the constructed string
+                $animal_type_sql = ltrim($animal_type_sql, " OR ");
+
+                // Construct the sort order for the SQL query
+                $sort_order = "";
+                if (isset($_GET['sort_by'])) {
+                    $sort_by = $_GET['sort_by'];
+                    foreach ($sort_by as $sort_option) {
+                        switch ($sort_option) {
+                            case 'age_desc':
+                                $sort_order .= "AGE DESC, ";
+                                break;
+                            case 'age_asc':
+                                $sort_order .= "AGE ASC, ";
+                                break;
+                            case 'name_asc':
+                                $sort_order .= "NAME ASC, ";
+                                break;
+                            case 'name_desc':
+                                $sort_order .= "NAME DESC, ";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    // Remove trailing ", " from the constructed string
+                    $sort_order = rtrim($sort_order, ", ");
+                }
+
+                // Construct the SQL query based on the selected column, animal types, and sort order
+                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM WHERE ($animal_type_sql) AND $column LIKE '%$query%'";
+                if ($sort_order != "") {
+                    $sql .= " ORDER BY $sort_order";
+                }
+            } else {
+                // Default SQL query to retrieve all animals
+                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM";
+            }
+
+            $result = $conn->query($sql);
+
+            if ($result->num_rows > 0) {
+                // Output data of each animal
+                while ($row = $result->fetch_assoc()) {
+                    $image_filename = $row["MICROCHIPNUM"] . ".jpg";
+                    echo "<div class='animal-square'>";
+                    echo "<h3>" . $row["NAME"] . "</h3>";
+                    if ($row["DOG_BREED"]) {
+                        echo "<p>Dog Breed: " . $row["DOG_BREED"] . "</p>";
+                    }
+                    if ($row["CAT_BREED"]) {
+                        echo "<p>Cat Breed: " . $row["CAT_BREED"] . "</p>";
+                    }
+                    echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
+                    echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
+                    echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
+                    echo "<p>Gender: " . $row["GENDER"] . "</p>";
+                    echo "<p>Needs: " . $row["MEDICATION"] . "</p>";
+                    // Display the image if it exists, otherwise display a placeholder
+                    if ($image_filename !== null && file_exists($image_filename)) {
+                        echo "<img src='../images/$image_filename' alt='" . $row["NAME"] . "'>";
+                    } else {
+                        echo "<img src='../images/ERROR.png' alt='Placeholder Image'>";
+                    }
+                    echo "</div>";
+                }
+            } else {
+                echo "No animals found.";
+            }
+            $conn->close(); // Close the database connection
+            ?>
+        </div>
+    </section>
+    
+    <section id="help">
+        <h2>How You Can Help</h2>
+        <p>You can help by adopting a pet, volunteering your time, or making a donation. Every little bit helps us continue our mission.</p>
+    </section>
+    
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <p>If you're interested in adopting a pet or have any questions, please contact us at info@humane-society.com or (555) 123-4567.</p>
+    </section>
+</div>
+
+<footer>
+    <div class="footer">
+        <a href="../society.html#about">About Us</a>
+    </div>
+    <p>&copy; THIS IS FAKE AND NOT REAL - 2024 Humane Society Adoption Center. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
