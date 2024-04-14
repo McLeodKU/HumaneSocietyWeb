@@ -1,45 +1,48 @@
 <?php
 session_start();
-ini_set('display_errors', 1);  // Enable error reporting
-error_reporting(E_ALL);
+include 'db_connection.php';  // Ensure this path points to your actual database connection script
+
+// Initialize a variable for error messages
+$login_err = "";
 
 // Check if the form has been submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $number = $_POST['number'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['number'])) {
+    $employeeID = trim($_POST['number']);
 
-    // Check if the input is a number
-    if (is_numeric($number)) {
-        $_SESSION['number'] = $number;  // Store the number in a session variable
+    // Prepare a select statement to check the employee ID
+    $sql = "SELECT EMPLOYEE_ID FROM EMPLOYEE WHERE EMPLOYEE_ID = ?";
+    if ($stmt = $conn->prepare($sql)) {
+        // Bind variables to the prepared statement as parameters
+        $stmt->bind_param("s", $employeeID);
+        
+        // Execute the query
+        if ($stmt->execute()) {
+            // Store result
+            $stmt->store_result();
+            
+            // Check if employee ID exists, if yes then verify password
+            if ($stmt->num_rows == 1) {
+                // Employee ID is valid
+                $_SESSION['number'] = $employeeID;  // Set the session variable
+                header("location: ../society.html"); // Redirect to a welcome page
+                exit();
+            } else {
+                // Redirect to login page with an error message if employee ID doesn't exist
+                header("location: ../html_pages/employee.html?error=invalidID");
+                exit();
+            }
+        } else {
+            echo "Oops! Something went wrong. Please try again later.";
+        }
 
-        // Redirect to society.php
-        header("Location: ../society.html");
-        exit();  // Prevent further script execution after redirect
+        // Close statement
+        $stmt->close();
     } else {
-        // Optionally handle the error case where the input is not a number
-        $error = "Please enter a valid number.";
+        echo "Error: " . $conn->error;
     }
+    // Close connection
+    $conn->close();
+} else {
+    $login_err = "Please enter your employee ID.";
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Number Login</title>
-</head>
-<body>
-    <h2>Enter a Number</h2>
-    <form method="POST" action="login.php">
-        <div>
-            <label for="number">Number:</label>
-            <input type="text" id="number" name="number" required>
-        </div>
-        <div>
-            <button type="submit">Submit</button>
-        </div>
-        <?php if (!empty($error)): ?>
-            <p style="color: red;"><?php echo $error; ?></p>
-        <?php endif; ?>
-    </form>
-</body>
-</html>
