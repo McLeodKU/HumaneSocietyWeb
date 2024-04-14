@@ -1,3 +1,14 @@
+<?php
+session_start(); // Start the session at the top of the file
+
+// Here you can add checks, such as verifying if a user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // If not logged in, redirect to the login page
+    header('Location: login.php');
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +24,10 @@
 <div class="navbar">
     <img src="logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
     <div>
-        <a href="society.html">Home</a> 
-        <a href="society.html#about">About Us</a>
-        <a href="animals.html">Available Pets</a>
-        <a href="society.html#contact">Contact</a>
+        <a href="society.php">Home</a> 
+        <a href="society.php#about">About Us</a>
+        <a href="animals.php">Available Pets</a>
+        <a href="society.php#contact">Contact</a>
     </div>
 </div>
 
@@ -26,11 +37,6 @@
 </header>
 
 <div class="container">
-    <section id="about">
-        <h2>About Us</h2>
-        <p>We are a non-profit organization dedicated to the welfare of animals. We provide shelter, care, and love to homeless pets until they find their forever homes.</p>
-    </section>
-    
     <section id="pets">
         <h2>Animal Details</h2>
         <div class="query-box">
@@ -71,101 +77,52 @@
         </div>
         <div class="row">
             <?php
-            error_reporting(E_ALL);
-            ini_set('display_errors', 1);
-
             include 'db_connection.php'; // Include the database connection file
+            // Assuming the database connection $conn is established in db_connection.php
 
-            // Check if a query has been submitted
-            if (isset($_GET['query']) && isset($_GET['column']) && isset($_GET['animal_type'])) {
+            // Handle the form submission
+            if ($_SERVER['REQUEST_METHOD'] == 'GET' && !empty($_GET['query'])) {
                 $query = $_GET['query'];
                 $column = $_GET['column'];
-                $animal_types = $_GET['animal_type'];
-                $animal_type_sql = "";
+                $animal_types = $_GET['animal_type'] ?? [];
 
                 // Construct the animal type filter for the SQL query
-                foreach ($animal_types as $type) {
-                    if ($type == 'cat') {
-                        $animal_type_sql .= " OR CAT.MICROCHIPNUM IS NOT NULL";
-                    } elseif ($type == 'dog') {
-                        $animal_type_sql .= " OR DOG.MICROCHIPNUM IS NOT NULL";
-                    }
-                }
-
-                // Remove leading " OR " from the constructed string
-                $animal_type_sql = ltrim($animal_type_sql, " OR ");
+                $animal_type_sql = array_map(function($type) {
+                    return $type . ".MICROCHIPNUM IS NOT NULL";
+                }, $animal_types);
+                $animal_type_sql = implode(' OR ', $animal_type_sql);
 
                 // Construct the sort order for the SQL query
                 $sort_order = "";
-                if (isset($_GET['sort_by'])) {
-                    $sort_by = $_GET['sort_by'];
-                    foreach ($sort_by as $sort_option) {
-                        switch ($sort_option) {
-                            case 'age_desc':
-                                $sort_order .= "AGE DESC, ";
-                                break;
-                            case 'age_asc':
-                                $sort_order .= "AGE ASC, ";
-                                break;
-                            case 'name_asc':
-                                $sort_order .= "NAME ASC, ";
-                                break;
-                            case 'name_desc':
-                                $sort_order .= "NAME DESC, ";
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    // Remove trailing ", " from the constructed string
-                    $sort_order = rtrim($sort_order, ", ");
+                if (!empty($_GET['sort_by'])) {
+                    $sort_order = implode(', ', array_map(function($sort) {
+                        return $sort;
+                    }, $_GET['sort_by']));
                 }
 
-                // Construct the SQL query based on the selected column, animal types, and sort order
-                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM WHERE ($animal_type_sql) AND $column LIKE '%$query%'";
-                if ($sort_order != "") {
-                    $sql .= " ORDER BY $sort_order";
+                // Construct and execute the query
+                $sql = "SELECT * FROM ANIMAL WHERE $column LIKE '%$query%' " .
+                       ($animal_type_sql ? " AND ($animal_type_sql)" : "") .
+                       ($sort_order ? " ORDER BY $sort_order" : "");
+                $result = $conn->query($sql);
+
+                if ($result && $result->num_rows > 0) {
+                    // Output data of each row
+                    while($row = $result->fetch_assoc()) {
+                        echo "<div class='animal-square'>";
+                        echo "<h3>" . htmlspecialchars($row["NAME"]) . "</h3>";
+                        echo "<p>Date of Birth: " . htmlspecialchars($row["DOB"]) . "</p>";
+                        echo "<p>Weight: " . htmlspecialchars($row["WEIGHT"]) . "</p>";
+                        echo "</div>";
+                    }
+                } else {
+                    echo "No animals found.";
                 }
-            } else {
-                // Default SQL query to retrieve all animals
-                $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED FROM ANIMAL LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM";
             }
-
-            $result = $conn->query($sql);
-
-            if ($result->num_rows > 0) {
-                // Output data of each animal
-                while ($row = $result->fetch_assoc()) {
-                    $image_filename = $row["MICROCHIPNUM"] . ".jpg";
-                    echo "<div class='animal-square'>";
-                    echo "<h3>" . $row["NAME"] . "</h3>";
-                    if ($row["DOG_BREED"]) {
-                        echo "<p>Dog Breed: " . $row["DOG_BREED"] . "</p>";
-                    }
-                    if ($row["CAT_BREED"]) {
-                        echo "<p>Cat Breed: " . $row["CAT_BREED"] . "</p>";
-                    }
-                    echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
-                    echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
-                    echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
-                    echo "<p>Gender: " . $row["GENDER"] . "</p>";
-                    echo "<p>Needs: " . $row["MEDICATION"] . "</p>";
-                    // Display the image if it exists, otherwise display a placeholder
-                    if ($image_filename !== null && file_exists($image_filename)) {
-                        echo "<img src='$image_filename' alt='" . $row["NAME"] . "'>";
-                    } else {
-                        echo "<img src='ERROR.png' alt='Placeholder Image'>";
-                    }
-                    echo "</div>";
-                }
-            } else {
-                echo "No animals found.";
-            }
-            $conn->close(); // Close the database connection
             ?>
         </div>
     </section>
-    
+
     <section id="help">
         <h2>How You Can Help</h2>
         <p>You can help by adopting a pet, volunteering your time, or making a donation. Every little bit helps us continue our mission.</p>
