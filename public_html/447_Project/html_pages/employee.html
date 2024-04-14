@@ -20,8 +20,8 @@
         <a href="employee.html">Employees</a>
         <?php
             session_start();
-            // Check if user is logged in
             if (isset($_SESSION['number'])) {
+                echo '<a href="../html_pages/edit_pet_info.html">Edit Pet Info</a>'; // Link to the pet editing page
                 echo '<a href="../php_code/logout.php">Logout</a>'; // Link to logout script
             }
         ?>
