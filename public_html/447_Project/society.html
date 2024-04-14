@@ -20,27 +20,17 @@
 <div class="navbar">
     <img src="images/logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
     <div>
-        <!-- <a href="society.html">Home</a> 
+        <a href="society.html">Home</a> 
         <a href="society.html#about">About Us</a>
         <a href="html_pages/animals.html">Available Pets</a>
         <a href="society.html#contact">Contact</a>
-        <a href="html_pages/employee.html" id="employeesTab">Employees</a> -->
+        <a href="html_pages/employee.html" id="employeesTab">Employees</a>
         <?php
             session_start();
             // Check if user is logged in
             if (isset($_SESSION['number'])) {
-                echo '<a href="../society.html">Home</a>'; 
-                echo '<a href="../society.html#about">About Us</a>';
-                echo '<a href="../html_pages/animals.html">Available Pets</a>';
-                echo '<a href="../society.html#contact">Contact</a>';
-                echo '<a href="../html_pages/edit_pet_info.html">Edit Pet Info</a>'; // Link to the pet editing page
-                echo '<a href="../php_code/logout.php">Logout</a>'; // Link to logout script
-            } else {
-                echo '<a href="../society.html">Home</a>'; 
-                echo '<a href="../society.html#about">About Us</a>';
-                echo '<a href="../html_pages/animals.html">Available Pets</a>';
-                echo '<a href="../society.html#contact">Contact</a>';
-                echo '<a href="../html_pages/employee.html" id="employeesTab">Employees</a>';
+                echo '<a href="html_pages/edit_pet_info.html">Edit Pet Info</a>'; // Link to the pet editing page
+                echo '<a href="php_code/logout.php">Logout</a>'; // Link to logout script
             }
         ?>
     </div>
