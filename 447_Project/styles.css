@@ -1,0 +1,134 @@
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #f4f4f4;
+}
+.navbar {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar a, .footer a {
+    color: white;
+    text-decoration: none;
+    padding: 0 15px;
+}
+.navbar a:hover, .footer a:hover {
+    text-decoration: underline;
+}
+header, footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px 10px;
+}
+.container {
+    padding: 20px;
+}
+.pet {
+    background-color: white;
+    border: 1px solid #dddddd;
+    margin: 10px 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+}
+.pet-img {
+    width: 200px;
+    height: auto;
+    margin-right: 20px;
+    border-radius: 10px;
+}
+h2 {
+    color: #007BFF;
+}
+.footer {
+    display: flex;
+    justify-content: center;
+    background-color: #007BFF;
+    padding: 10px 20px;
+}
+.footer a {
+    margin: 0 10px;
+}
+
+.navbar > div:first-child {
+    font-size: 24px; 
+    font-weight: 700; 
+    color: #FFD700; 
+    text-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+}
+
+
+.navbar {
+    background-image: linear-gradient(to right, #007BFF, #654ea3);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px; 
+}
+
+.info-square {
+    flex: 0 0 calc(33.33% - 20px); 
+    margin: 10px; 
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.query-box {
+    background-image: linear-gradient(to right, #007BFF, #654ea3);
+    padding: 10px; 
+    margin-bottom: 20px; 
+}
+
+.query-box label {
+    display: block; 
+    margin-bottom: 5px; 
+}
+
+
+.query-box input[type="checkbox"] {
+    margin-right: 5px; 
+}
+
+.checkbox-group {
+    background-image: linear-gradient(to right, #505050, #3c3c3c);
+    color: #ffffff;
+    
+}
+
+.animal-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; 
+    margin-top: 20px; 
+}
+
+.animal-square {
+    flex: 0 0 calc(33.33% - 20px); 
+    margin-bottom: 20px; 
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    text-align: center; 
+}
+
+.animal-square img {
+    max-width: 100%; 
+    max-height: 100%; 
+    border-radius: 5px; 
+}
+
+.animal-image {
+    width: 150px; 
+    height: auto;
+}

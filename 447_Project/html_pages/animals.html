@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas County Humane</title>
+    <link rel="icon" type="image/png" href="../images/small.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <?php
+        if (isset($_GET['logout'])) {
+            echo '<div style="background-color: #ffe6e6; color: #ff3333; padding: 10px; text-align: center;">';
+            echo 'You have been logged out.';
+            echo '</div>';
+        }
+    ?>
+
+    <div class="navbar">
+        <img src="../images/logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
+        <div>
+            <a href="../society.html">Home</a> 
+            <a href="../society.html#about">About Us</a>
+            <a href="../html_pages/animals.html">Available Pets</a>
+            <a href="../society.html#contact">Contact</a>
+            <a href="../html_pages/employee.html" id="employeesTab">Employees</a>
+            <a href="../html_pages/acknowledgments.html">Acknowledgements</a>
+            <?php
+                session_start();
+                // Check if user is logged in
+                if (isset($_SESSION['number'])) {
+                    echo '<a href="../html_pages/edit_pet_info.html">Edit Pet Info</a>'; 
+                    echo '<a href="../php_code/logout.php">Logout</a>'; 
+                }
+            ?>
+        </div>
+    </div>
+
+    <header>
+        <h1>Welcome to Our Humane Society Adoption Center</h1>
+        <p>Helping Pets Find Forever Homes</p>
+    </header>
+
+    <div class="container">
+        
+        <section id="pets">
+    <h2>Animal Details</h2>
+    <div class="query-box">
+        <form action="#" method="GET">
+            <div class="checkbox-group">
+                <fieldset>
+                    <legend>Select animal type:</legend>
+                    <input type="checkbox" id="cat" name="animal_type[]" value="cat">
+                    <label for="cat">Cat</label>
+                    <input type="checkbox" id="dog" name="animal_type[]" value="dog">
+                    <label for="dog">Dog</label>
+                </fieldset>
+            </div>
+            <div class="checkbox-group">
+                <fieldset>
+                    <legend>Filter by gender:</legend>
+                    <input type="checkbox" id="M    ale" name="gender[]" value="male">
+                    <label for="male">Male</label>
+                    <input type="checkbox" id="Female" name="gender[]" value="female">
+                    <label for="female">Female</label>
+                </fieldset>
+            </div>
+            <div class="checkbox-group">
+                <fieldset>
+                    <legend>Filter by origin:</legend>
+                    <input type="checkbox" id="stray" name="origin[]" value="stray">
+                    <label for="stray">Stray</label>
+                    <input type="checkbox" id="rescue" name="origin[]" value="rescue">
+                    <label for="rescue">Rescue</label>
+                    <input type="checkbox" id="home" name="origin[]" value="home">
+                    <label for="home">Home</label>
+                </fieldset>
+            </div>
+            <div class="checkbox-group">
+                <fieldset>
+                    <legend>Sort by:</legend>
+                    <input type="checkbox" id="age_desc" name="sort_by[]" value="age_desc">
+                    <label for="age_desc">Age Descending</label>
+                    <input type="checkbox" id="age_asc" name="sort_by[]" value="age_asc">
+                    <label for="age_asc">Age Ascending</label>
+                    <input type="checkbox" id="name_asc" name="sort_by[]" value="name_asc">
+                    <label for="name_asc">Name Ascending</label>
+                    <input type="checkbox" id="name_desc" name="sort_by[]" value="name_desc">
+                    <label for="name_desc">Name Descending</label>
+                </fieldset>
+            </div>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div class="row">
+        <?php
+        include '../php_code/db_connection.php'; // database connection file
+
+        // check if database connection is successful
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+
+        // default SQL query to retrieve all animals
+        $sql = "SELECT ANIMAL.*, DOG.BREED AS DOG_BREED, CAT.BREED AS CAT_BREED 
+                FROM ANIMAL 
+                LEFT JOIN DOG ON ANIMAL.MICROCHIPNUM = DOG.MICROCHIPNUM 
+                LEFT JOIN CAT ON ANIMAL.MICROCHIPNUM = CAT.MICROCHIPNUM";
+
+        // check if a query has been submitted
+        if (
+            (isset($_GET['query']) && isset($_GET['column'])) ||  // Check if query and column are set
+            isset($_GET['animal_type']) ||                       // Check if animal_type is set
+            isset($_GET['gender']) ||                             // Check if gender is set
+            isset($_GET['origin']) ||                             // Check if origin is set
+            isset($_GET['sort_by'])                               // Check if sort_by is set
+        ) {
+            // Initialize the WHERE condition
+            // Initialize the WHERE condition
+            $where_conditions = [];
+            
+            // construct the animal type filter for the SQL query
+            if (isset($_GET['animal_type']) && !empty($_GET['animal_type'])) {
+                $animal_types = $_GET['animal_type'];
+                $animal_type_conditions = [];
+                foreach ($animal_types as $animal_type) {
+                    switch ($animal_type) {
+                        case 'cat':
+                            $animal_type_conditions[] = "CAT.MICROCHIPNUM IS NOT NULL";
+                            break;
+                        case 'dog':
+                            $animal_type_conditions[] = "DOG.MICROCHIPNUM IS NOT NULL";
+                            break;
+                    }
+                }
+                $where_conditions[] = "(" . implode(" OR ", $animal_type_conditions) . ")";
+            }
+            
+            // construct the gender filter for the SQL query
+            if (isset($_GET['gender']) && !empty($_GET['gender'])) {
+                $genders = $_GET['gender'];
+                $gender_conditions = [];
+                foreach ($genders as $gender) {
+                    switch ($gender) {
+                        case 'male':
+                            $gender_conditions[] = "ANIMAL.GENDER LIKE 'male'";
+                            break;
+                        case 'female':
+                            $gender_conditions[] = "ANIMAL.GENDER LIKE 'female'";
+                            break;
+                    }
+                }
+                $where_conditions[] = "(" . implode(" OR ", $gender_conditions) . ")";
+            }
+            
+            // construct the origin filter for the SQL query
+            if (isset($_GET['origin']) && !empty($_GET['origin'])) {
+                $origins = $_GET['origin'];
+                $origin_conditions = [];
+                foreach ($origins as $origin) {
+                    switch ($origin) {
+                        case 'stray':
+                            $origin_conditions[] = "ANIMAL.ORIGIN LIKE 'stray'";
+                            break;
+                        case 'rescue':
+                            $origin_conditions[] = "ANIMAL.ORIGIN LIKE 'rescue'";
+                            break;
+                        case 'home':
+                            $origin_conditions[] = "ANIMAL.ORIGIN LIKE 'home'";
+                            break;
+                    }
+                }
+                $where_conditions[] = "(" . implode(" OR ", $origin_conditions) . ")";
+            }
+            
+            // combine all WHERE conditions with AND operator
+            $where_sql = "";
+            if (!empty($where_conditions)) {
+                $where_sql = " WHERE " . implode(" AND ", $where_conditions);
+            }
+            
+            // construct the sort order for the SQL query
+            if (isset($_GET['sort_by']) && !empty($_GET['sort_by'])) {
+                $sort_options = $_GET['sort_by'];
+                $sort_sql = " ORDER BY ";
+                foreach ($sort_options as $sort_option) {
+                    switch ($sort_option) {
+                        case 'age_desc':
+                            $sort_sql .= "ANIMAL.DOB DESC, ";
+                            break;
+                        case 'age_asc':
+                            $sort_sql .= "ANIMAL.DOB ASC, ";
+                            break;
+                        case 'name_desc':
+                            $sort_sql .= "ANIMAL.NAME DESC, ";
+                            break;
+                        case 'name_asc':
+                            $sort_sql .= "ANIMAL.NAME ASC, ";
+                            break;
+                    }
+                }
+                $sort_sql = rtrim($sort_sql, ", ");
+            } else {
+                $sort_sql = ""; // No sort order if sort by checkboxes are not selected
+            }
+            $sql .= $where_sql . $sort_sql;
+        }
+
+        // Debugging print statement to display the SQL query
+        // echo "Debugging: SQL Query: $sql<br>";
+
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            // output data of each animal
+            while ($row = $result->fetch_assoc()) {
+                $image_filename = $row["MICROCHIPNUM"] . ".png";
+                echo "<div class='animal-square'>";
+                echo "<h3>" . $row["NAME"] . "</h3>";
+                if ($row["DOG_BREED"]) {
+                    echo "<p>Dog Breed: " . $row["DOG_BREED"] . "</p>";
+                }
+                if ($row["CAT_BREED"]) {
+                    echo "<p>Cat Breed: " . $row["CAT_BREED"] . "</p>";
+                }
+                echo "<p>Date of Birth: " . $row["DOB"] . "</p>";
+                echo "<p>Weight: " . $row["WEIGHT"] . "</p>";
+                echo "<p>Origin: " . $row["ORIGIN"] . "</p>";
+                echo "<p>Gender: " . $row["GENDER"] . "</p>";
+                echo "<p>Needs: " . $row["MEDICATION"] . "</p>";
+                // display the image if it exists, otherwise display a placeholder
+                if ($image_filename !== null && file_exists("../images/$image_filename")) {
+                    echo "<img src='../images/$image_filename' alt='" . $row["NAME"] . "' class='animal-image'>";
+                } else {
+                    echo "<img src='../images/ERROR.png' alt='Placeholder Image' class='animal-image'>";
+                }
+                echo "</div>";
+            }
+        } else {
+            echo "No animals found.";
+        }
+        $conn->close(); // Close the database connection
+        ?>
+    </section>
+        
+        <section id="help">
+            <h2>How You Can Help</h2>
+            <p>You can help by adopting a pet, volunteering your time, or making a donation. Every little bit helps us continue our mission.</p>
+        </section>
+        
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <p>If you're interested in adopting a pet or have any questions, please contact us at info@humane-society.com or (555) 123-4567.</p>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer">
+            <a href="../society.html#about">About Us</a>
+        </div>
+        <p>&copy; THIS IS FAKE AND NOT REAL - 2024 Humane Society Adoption Center. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

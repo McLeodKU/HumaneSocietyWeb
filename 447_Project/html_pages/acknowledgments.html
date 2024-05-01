@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acknowledgments - Douglas County Humane</title>
+    <link rel="icon" type="image/png" href="../images/small.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<div class="navbar">
+    <img src="../images/logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
+    <div>
+        <a href="../society.html">Home</a> 
+        <a href="../society.html#about">About Us</a>
+        <a href="../html_pages/animals.html">Available Pets</a>
+        <a href="../society.html#contact">Contact</a>
+        <a href="../html_pages/employee.html" id="employeesTab">Employees</a>
+        <a href="../html_pages/acknowledgments.html">Acknowledgements</a>
+        <?php
+            session_start();
+            // Check if user is logged in
+            if (isset($_SESSION['number'])) {
+                echo '<a href="../html_pages/edit_pet_info.html">Edit Pet Info</a>'; 
+                echo '<a href="../php_code/logout.php">Logout</a>'; 
+            }
+        ?>
+    </div>
+</div>
+
+<header>
+    <h1>Acknowledgments</h1>
+    <p>Recognizing All Who Help Us Make a Difference</p>
+</header>
+
+<div class="container">
+    <section id="acknowledgments">
+        <h2>Our Supporters</h2>
+        <p>We are incredibly grateful to all our supporters who contribute to our mission. This includes our volunteers, donors, and community partners.</p>
+        <ul>
+            <li>https://coleandmarmalade.com/2019/06/14/sweet-stray-siamese-cat-with-severe-mange-transforms-into-a-gorgeous-girl-with-a-forever-home/</li>
+            <li>https://www.eastcottvets.co.uk/news/310-found-grey-tabby-male-cat</li>
+            <li>https://sassykoonz.com/maine-coon-size-chart-how-big-will-your-maine-coon-get/</li>
+            <li>https://nationalkitty.com/persian-cat-rescued-by-loving-family/</li>
+            <li>https://www.animalleague.org/adirondack-region-adoption-center/meet-our-adoptable-cats/attachment/nci2011-hopper-male-adult-orange-tabby-adk-112922/</li>
+            <li>https://www.lostmykitty.com/details.cfm?petid=176482</li>         
+            <li>https://www.facebook.com/moscowmainecoons/</li>
+            <li>https://www.facebook.com/groups/2867104993546507/</li>
+            <li>https://www.reddit.com/r/labrador/comments/yh6m6o/at_75_pounds_vet_told_us_she_was_to_fat_to_fix/</li>
+            <li>https://www.reddit.com/r/goldenretrievers/comments/14kb6m8/looking_for_insight_how_big_is_your_male_golden/</li>
+            <li>https://www.reddit.com/r/DoggyDNA/comments/odajj1/mini_german_shepherd_our_girl_came_into_the/</li>
+            <li>https://www.royalstandardpoodles.com/largecreamstandardpoodleszada.html</li>
+            <li>https://www.reddit.com/r/Bulldogs/comments/jraarj/is_it_normal_for_him_to_be_over_70_lbs_i_honestly/</li>
+            <li>https://www.petfinder.com/dog/gilligan-53800600/in/indianapolis/waldos-muttley-crew-in579/</li>
+            <li>https://www.atlantaboxerrescue.org/availableboxers.html</li>
+
+
+
+
+        </ul>
+    </section>
+
+    <section id="special-thanks">
+        <h2>Special Thanks</h2>
+        <p>We would like to give a special shout-out to the following organization:</p>
+        <ul>
+            <li>https://www.douglascountyhumanesociety.com/</li>
+        </ul>
+    </section>
+</div>
+
+<footer>
+    <div class="footer">
+        <a href="#about">About Us</a>
+    </div>
+    <p>&copy; THIS IS FAKE AND NOT REAL - 2024 Humane Society Adoption Center. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

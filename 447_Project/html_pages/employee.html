@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Douglas County Humane</title>
+    <link rel="icon" type="image/png" href="../images/small.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
+<div class="navbar">
+    <img src="../images/logo.png" alt="Douglas County Humane Logo" style="height:100px; vertical-align: middle; margin-right: 10px;">
+    <div>
+        <a href="../society.html">Home</a> 
+        <a href="../society.html#about">About Us</a>
+        <a href="animals.html">Available Pets</a>
+        <a href="../society.html#contact">Contact</a>
+        <a href="employee.html">Employees</a>
+        <a href="../html_pages/acknowledgments.html">Acknowledgements</a>
+
+        <?php
+            session_start();
+            if (isset($_SESSION['number'])) {
+                echo '<a href="../html_pages/edit_pet_info.html">Edit Pet Info</a>';
+                echo '<a href="../php_code/logout.php">Logout</a>';
+            }
+        ?>
+    </div>
+</div>
+
+<header>
+    <h1>Welcome to Our Humane Society Adoption Center</h1>
+    <p>Helping Pets Find Forever Homes</p>
+</header>
+
+<div class="container">
+    <!-- Login Form -->
+    <section id="login">
+        <h2>Login</h2>
+        <form method="POST" action="../php_code/login.php">
+            <div>
+                <label for="number">Employee ID:</label>
+                <input type="text" id="number" name="number" required>
+            </div>
+            <div>
+                <button type="submit">Login</button>
+            </div>
+            <script>
+                window.onload = function() {
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('error') === 'invalidID') {
+                        alert('Invalid ID');
+                    }
+                }
+                </script>
+                
+        </form>
+        <?php if (!empty($error)): ?>
+            <p style="color: red;"><?php echo $error; ?></p>
+        <?php endif; ?>
+    </section>
+</div>
+
+<footer>
+    <div class="footer">
+        <a href="#about">About Us</a>
+    </div>
+    <p>&copy; THIS IS FAKE AND NOT REAL - 2024 Humane Society Adoption Center. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
